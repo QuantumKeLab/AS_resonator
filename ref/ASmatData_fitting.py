@@ -17,6 +17,7 @@ from scipy.optimize import curve_fit as cf
 fdName = "Data" # Type folder name (which the mat file live in, and which is in the same dir with this py file)
 
 
+
 def get_myDelay( fdata, zdata ):
     edge_range = int(len(fdata)*0.1)
     end_point = int(len(fdata)*0.05)

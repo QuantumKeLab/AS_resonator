@@ -22,34 +22,36 @@ def cavityQ_fit_dependency( freq:np.ndarray, s21:np.ndarray, power:np.ndarray=No
         iq_fit = s21[xi]
         myResonator = notch_port()        
         
-        try:
+        # try:
             # print("auto fitting")
             #delay, params =myResonator.get_delay(freq_fit,iq_fit)
             # myResonator.autofit(electric_delay=mydelay)
-            mydelay = get_myDelay( freq_fit, iq_fit ) 
+        mydelay = get_myDelay( freq_fit, iq_fit ) 
+        delay, amp_norm, alpha, fr, Ql, A2, frcal =\
+                myResonator.do_calibration(freq_fit,iq_fit, fixed_delay=mydelay) 
+        
+        myResonator.z_data = myResonator.do_normalization(freq_fit,iq_fit,delay,amp_norm,alpha,A2,frcal)
 
-            delay, amp_norm, alpha, fr, Ql, A2, frcal =\
-                    myResonator.do_calibration(freq_fit,iq_fit, fixed_delay=mydelay)
-            myResonator.z_data = myResonator.do_normalization(freq_fit,iq_fit,delay,amp_norm,alpha,A2,frcal)
+        myResonator.fitresults = myResonator.circlefit(freq_fit,myResonator.z_data,fr,Ql)
+        myResonator.z_data_sim = myResonator._S21_notch(
+            freq_fit,fr=myResonator.fitresults["fr"],
+            Ql=myResonator.fitresults["Ql"],
+            Qc=myResonator.fitresults["absQc"],
+            phi=myResonator.fitresults["phi0"],
+            a=amp_norm,alpha=alpha,delay=delay)
+        fit_results = myResonator.fitresults
+        fit_results["A"] = amp_norm
+        fit_results["alpha"] = alpha
+        fit_results["delay"] = delay
 
-            myResonator.fitresults = myResonator.circlefit(freq_fit,myResonator.z_data,fr,Ql)
-            myResonator.z_data_sim = myResonator._S21_notch(
-                freq_fit,fr=myResonator.fitresults["fr"],
-                Ql=myResonator.fitresults["Ql"],
-                Qc=myResonator.fitresults["absQc"],
-                phi=myResonator.fitresults["phi0"],
-                a=amp_norm,alpha=alpha,delay=delay)
-            fit_results = myResonator.fitresults
-            fit_results["A"] = amp_norm
-            fit_results["alpha"] = alpha
-            fit_results["delay"] = delay
-
-            if powerdep:
-                fit_results["photons"] = myResonator.get_photons_in_resonator(power[xi])
-            fitCurves.append(myResonator.z_data_sim)
+        if powerdep:
+            fit_results["photons"] = myResonator.get_photons_in_resonator(power[xi])
+        fitCurves.append(myResonator.z_data_sim)
             
-        except:
-            print(f"{xi} Fit failed")
+        # except:
+
+        #     fit_results = {}
+        #     print(f"{xi} Fit failed")
         
         fitParas.append(fit_results)
     df_fitParas = pd.DataFrame(fitParas)
@@ -120,7 +122,7 @@ def tan_loss(x,a,c,nc):
 
 def fit_tanloss( n, loss, loss_err ):
     upper_bound = [1,1,1e4]
-    lower_bound = [0,0,0]
+    lower_bound = [0, 0, 0]
     
     min_loss = np.amin(loss)
     max_loss = np.amax(loss)

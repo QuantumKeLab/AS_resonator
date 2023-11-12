@@ -1,5 +1,5 @@
 import sys
-sys.path.append(r'c:\\Users\\shiau\\AS_resonator')
+sys.path.append(r'C:\Users\admin\Documents\GitHub\AS_resonator')
 
 from general.file_structure import *
 from general.analysis_method import *
@@ -7,9 +7,9 @@ from general.plot_method import *
 from general.format_trans import *
 
 # 1. Sample path setting
-sample_name = "ITRI_Nb_RD_152"
-project_folder = r"Z:\data\resonator" # empty string "" for relative path 
-attenuation = 93
+sample_name = "S43_W_bonding"
+project_folder = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\CCD_Lab\20231106_5Q_resonator" # empty string "" for relative path 
+attenuation = 100
 
 VNA_minpower = -60
 # 1.1 File structure setting
@@ -54,7 +54,7 @@ for cav_label, flist in subgroup_struc.items():
     powerQ_result.Name = cav_label
 
     # plot_fitdata(raw_dfs)
-"""
+
 
     ## Save result
     save_power_dep(powerQ_result, f"{power_dep_folder}/{cav_label}.csv")
@@ -66,20 +66,20 @@ for cav_label, flist in subgroup_struc.items():
     # Fit loss model
     powerQ_result = pd.read_csv( f"{power_dep_folder}/{cav_label}.csv" )
     if len(powerQ_result.index) > 0:
-        pdloss = pd.DataFrame()
-        n = powerQ_result["photons"].to_numpy()
-        qi = powerQ_result["Qi_dia_corr"].to_numpy()
-        qi_err = powerQ_result["Qi_dia_corr_err"].to_numpy()
-        loss = 1/qi
-        loss_err = loss*qi_err/qi
-        pdloss["photons"] = n
-        pdloss["loss"] = loss
-        pdloss["loss_err"] = loss_err
+          pdloss = pd.DataFrame()
+          n = powerQ_result["photons"].to_numpy()
+          qi = powerQ_result["Qi_dia_corr"].to_numpy()
+          qi_err = powerQ_result["Qi_dia_corr_err"].to_numpy()
+          loss = 1/qi
+          loss_err = loss*qi_err/qi
+          pdloss["photons"] = n
+          pdloss["loss"] = loss
+          pdloss["loss_err"] = loss_err
 
-        tanloss_result = fit_tanloss( n, loss, loss_err )
-        tanloss_result["measurement_label"] = cav_label
-        tanloss_results.append(tanloss_result)
-        plot_powerdeploss_fitting(pdloss, tanloss_result, title=cav_label, output_fd=f"{tanloss_folder}" )
+          tanloss_result = fit_tanloss( n, loss, loss_err )
+          tanloss_result["measurement_label"] = cav_label
+          tanloss_results.append(tanloss_result)
+          plot_powerdeploss_fitting(pdloss, tanloss_result, title=cav_label, output_fd=f"{tanloss_folder}" )
 
 
 sample_tanloss = pd.concat(tanloss_results)
@@ -127,7 +127,8 @@ for cav_label in assignment["measurement_label"].values:
         print(f"No data in {cav_label}")
 
 
-plot_multiCav_powerQ(sample_result, sample_name, assignment, output=power_dep_folder)
+plot_multiCav_powerQi(sample_result, sample_name, assignment, output=power_dep_folder)
+plot_multiCav_powerQc(sample_result, sample_name, assignment, output=power_dep_folder)
 collected_q_result = pd.concat(collected_q_list)
 
 sample_statistic = pd.merge(collected_q_result, assignment, on="measurement_label")
@@ -166,4 +167,3 @@ for i, p in enumerate(plot_list):
 # plot_df(sample_statistic, ("center_linewidth","A_TLS","A_TLS_err",None), log_scale=(True,True), title=("","Center Linewidth (um)","TLS Loss"), output=f"{result_folder}/clw/A_TLS")
 # plot_df(sample_statistic, ("center_linewidth","const","const_err",None), log_scale=(True,True), title=("","Center Linewidth (um))","Const Loss"), output=f"{result_folder}/clw/const" )
 # plot_df(sample_statistic, ("center_linewidth","nc","nc_err",None), log_scale=(True,True), title=("","Center Linewidth (um)","nc"), output=f"{result_folder}/clw/nc" )
-"""

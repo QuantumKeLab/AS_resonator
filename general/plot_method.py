@@ -110,7 +110,6 @@ def plot_cavityS21_fitting(freq:np.ndarray, raw:np.ndarray, fit:np.ndarray, depe
     ax_iq.legend()
 
     if output_fd != None :
-        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         full_path = f"{output_fd}/{title}_fitcurve.png"
         print(f"Saving plot at {full_path}")
         plt.savefig(f"{full_path}")
@@ -159,7 +158,7 @@ def plot_powerdeploss_fitting( powerloss, tanloss_result, title=None, output_fd=
     axObj.set_xscale("log")
     axObj.set_yscale("log")
     if output_fd != None :
-        plt.savefig(f"{output_fd}/{title}_fitcurve.png")
+        plt.savefig(f"{output_fd}/{title}_loss_fit.png")
         plt.close()
     else:
         plt.show()
@@ -194,7 +193,7 @@ def plot_power_dependent_Q( powerQ_result, cav_label=None, output_fd=None ):
     axObj.set_title(cav_label)
     axObj.legend()
     if output_fd != None :
-        plt.savefig(f"{output_fd}/{cav_label}_fitcurve.png")
+        plt.savefig(f"{output_fd}/{cav_label}_power_dep_Q.png")
         plt.close()
     else:
         plt.show()
@@ -282,7 +281,7 @@ def plot_basic( data:pd.DataFrame, plot_style:dict=default_plot_style, axObj=Non
     return axObj
 
 # Older style
-def plot_multiCav_powerQ(dfs:List[pd.DataFrame], sample_name, assignment:pd.DataFrame, output=None ):
+def plot_multiCav_powerQi(dfs:List[pd.DataFrame], sample_name, assignment:pd.DataFrame, output=None ):
     
     plt.figure(facecolor='white', figsize=(8,5)) #figsize=(16,9),
     for df in dfs:
@@ -308,6 +307,36 @@ def plot_multiCav_powerQ(dfs:List[pd.DataFrame], sample_name, assignment:pd.Data
     if output != None :
         plt.savefig(f"{output}/{sample_name}_allQi.png")
     plt.close()
+
+# Plot all Qc
+def plot_multiCav_powerQc(dfs:List[pd.DataFrame], sample_name, assignment:pd.DataFrame, output=None ):
+    
+    plt.figure(facecolor='white', figsize=(8,5)) #figsize=(16,9),
+    for df in dfs:
+        print(f"ploting {df.Name}")
+        if df.Name in assignment['measurement_label'].to_numpy():
+            asi = assignment.loc[assignment['measurement_label'] == df.Name]
+            a_marker_style = asi["marker_style"].values[0]
+            a_color = asi["color"].values[0]
+            a_clw = asi["center_linewidth"].values[0]
+            a_design_Qc = asi["design_Qc"].values[0]
+            x_axis = df["photons"].to_numpy()
+            Qc = df["Qc_dia_corr"].to_numpy()
+            # Qi_err = df["Qi_dia_corr_err"].to_numpy() #No Qc_dia_corr_err
+            plt.errorbar(x_axis, Qc, ms = 5, fmt=a_marker_style, c=a_color, label=f"{df.Name}-{a_clw}um-design_Qc={a_design_Qc}")
+    plt.xlabel("Photon Number n",fontsize=16)
+    #plt.xticks(fontsize=13)
+    plt.ylabel("Qc",fontsize=16)
+    #plt.yticks(fontsize=13)
+    plt.legend()
+    plt.title( f"{sample_name}",fontsize=16)
+    plt.yscale('log')
+    plt.xscale('log')
+    #plt.show()
+    if output != None :
+        plt.savefig(f"{output}/{sample_name}_allQc.png")
+    plt.close()
+
 
 def plot_df(df:pd.DataFrame, xycols, axObj=None, log_scale=(False,False), title=None, output=None):
     """
